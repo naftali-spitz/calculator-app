@@ -23,33 +23,12 @@ export default function App() {
 		  setDisplayValue(num === '.' ? '0.' : num.toString());
 		  setExpression(num === '.' ? '0.' : num.toString());
 		  return;
+		} else {
+            setDisplayValue(expression + num);
+            setExpression(expression + num);
 		}
-	  
-		setDisplayValue(displayValue + num);
-		setExpression(expression + num);
 	};
-	  
-	// const handleNumberInput = (num) => {
-	// 	// Allow only one decimal point per number
-	// 	if (num === '.' && displayValue.includes('.')) {
-	// 		return;
-	// 	}
-		
-	// 	// Handle leading zeros and negative zero
-	// 	if (displayValue === '0' || displayValue === '-0') {
-	// 		setDisplayValue(num === '.' ? '0.' : num.toString());
-	// 		return;
-	// 	}
-		
-	// 	setDisplayValue(displayValue + num);
-	// };	
 
-    // Function to handle operator inputs
-    // const handleOperatorInput = (operator) => {
-    //     setOperator(operator);
-    //     setFirstValue(displayValue);
-    //     setDisplayValue('0');
-    // };
 	const handleOperatorInput = (operator) => {
 		if (operations.length === 0) {
 		  setExpression(displayValue + operator);
@@ -58,71 +37,13 @@ export default function App() {
 		}
 		setOperations([...operations, operator]);
 		setOperands([...operands, parseFloat(displayValue)]);
-		setDisplayValue('0');
+		setDisplayValue(expression + operator);
 	};
 
     // Function to handle equal button press
-	const handleEqual = () => {
-		const finalOperand = parseFloat(displayValue);
-		setOperands([...operands, finalOperand]);
-		setExpression(expression + displayValue);
-	  
-		let result = operands[0];
-		for (let i = 0; i < operations.length; i++) {
-		  const operator = operations[i];
-		  const operand = operands[i + 1];
-	  
-		  switch (operator) {
-			case '+':
-			  result += operand;
-			  break;
-			case '-':
-			  result -= operand;
-			  break;
-			case '*':
-			  result *= operand;
-			  break;
-			case '/':
-			  if (operand === 0) {
-				setDisplayValue('Error');
-				setOperations([]);
-				setOperands([]);
-				setExpression('');
-				return;
-			  }
-			  result /= operand;
-			  break;
-		  }
-		}
-		setDisplayValue(result.toString());
-  		setOperations([]);
-  		setOperands([]);
-  		setExpression(result.toString());
-};
-
-    // const handleEqual = () => {
-    //     const num1 = parseFloat(firstValue);
-    //     const num2 = parseFloat(displayValue);
-
-	// 	if (num2 === 0 && operator === '/') {
-	// 		setDisplayValue('Error');
-	// 		setOperator(null);
-	// 		setFirstValue('');
-	// 		return;
-
-    //     } else if (operator === '+') {
-    //         setDisplayValue((num1 + num2).toString());
-    //     } else if (operator === '-') {
-    //         setDisplayValue((num1 - num2).toString());
-    //     } else if (operator === '*') {
-    //         setDisplayValue((num1 * num2).toString());
-    //     } else if (operator === '/') {
-    //         setDisplayValue((num1 / num2).toString());
-    //     }
-
-    // 	setOperator(null);
-    // 	setFirstValue('');
- 	// };
+const handleEqual = () => {
+setDisplayValue(eval(expression))
+}
 
     // Function to handle clear button press
 	const handleClear = () => {
@@ -133,26 +54,25 @@ export default function App() {
 		setOperands([]);
 		setExpression('');
 	};
-    // const handleClear = () => {
-    //     setDisplayValue('0');
-    //     setOperator(null);
-    //     setFirstValue('');
-    // };
 
 	const handlePlusMinus = () => {
 		if (displayValue !== '0') {
             setDisplayValue((parseFloat(displayValue) * -1));
+            setExpression((parseFloat(displayValue) * -1).toString());
         }
 	}
 
 	const handlePercentage = () => {
+//	setDisplayValue(expression)
 		if (displayValue === '0') {
 			return
-		} else if (firstValue === '') {
+		} else if (operations.length === 0) {
 			const num1 = parseFloat(displayValue);
 			setDisplayValue(num1 / 100);
-		} else 
-			{const num1 = parseFloat(firstValue);
+		} else
+			{const firstValue = expression.slice(0, -1)
+			setDisplayValue(firstValue)
+			const num1 = eval(firstValue);
 			const num2 = parseFloat(displayValue) / 100;
 			setDisplayValue((num1 + (num1 * num2)).toString());
 			}
