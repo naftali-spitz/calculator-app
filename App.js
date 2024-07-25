@@ -4,90 +4,159 @@ import { StyleSheet, Text, View, TouchableOpacity }
 
 export default function App() {
 
-	// State variables
-	const [displayValue, setDisplayValue] = useState('0');
-	const [operator, setOperator] = useState(null);
-	const [firstValue, setFirstValue] = useState('');
-    const [operatorHistory, setOperatorHistory] = useState([]);
-    const [operandHistory, setOperandHistory] = useState([]);
-    const [lastOperation, setLastOperation] = useState(null);
+    // State variables
+    const [displayValue, setDisplayValue] = useState('0');
+    const [operator, setOperator] = useState(null);
+    const [firstValue, setFirstValue] = useState('');
+	const [expression, setExpression] = useState([]);
+	const [operations, setOperations] = useState([]);
+	const [operands, setOperands] = useState('');
 
-	// Function to handle number inputs
 	const handleNumberInput = (num) => {
-		if (displayValue === '0') {
-			setDisplayValue(num.toString());
-		} else {
-			setDisplayValue(displayValue + num);
+		// Allow only one decimal point per number
+		if (num === '.' && displayValue.includes('.')) {
+		  return;
 		}
+	  
+		// Handle leading zeros and negative zero
+		if (displayValue === '0' || displayValue === '-0') {
+		  setDisplayValue(num === '.' ? '0.' : num.toString());
+		  setExpression(num === '.' ? '0.' : num.toString());
+		  return;
+		}
+	  
+		setDisplayValue(displayValue + num);
+		setExpression(expression + num);
+	};
+	  
+	// const handleNumberInput = (num) => {
+	// 	// Allow only one decimal point per number
+	// 	if (num === '.' && displayValue.includes('.')) {
+	// 		return;
+	// 	}
+		
+	// 	// Handle leading zeros and negative zero
+	// 	if (displayValue === '0' || displayValue === '-0') {
+	// 		setDisplayValue(num === '.' ? '0.' : num.toString());
+	// 		return;
+	// 	}
+		
+	// 	setDisplayValue(displayValue + num);
+	// };	
+
+    // Function to handle operator inputs
+    // const handleOperatorInput = (operator) => {
+    //     setOperator(operator);
+    //     setFirstValue(displayValue);
+    //     setDisplayValue('0');
+    // };
+	const handleOperatorInput = (operator) => {
+		if (operations.length === 0) {
+		  setExpression(displayValue + operator);
+		} else {
+		  setExpression(expression + operator);
+		}
+		setOperations([...operations, operator]);
+		setOperands([...operands, parseFloat(displayValue)]);
+		setDisplayValue('0');
 	};
 
-	// Function to handle operator inputs
-	const handleOperatorInput = (operator) => {
-        setOperatorHistory([...operatorHistory, operator]);
-        setOperandHistory([...operandHistory, parseFloat(displayValue)]);
-        setDisplayValue('0');
-        setLastOperation(operator);
-    };
-
-	// Function to handle equal button press
+    // Function to handle equal button press
 	const handleEqual = () => {
-        const newOperandHistory = [...operandHistory, parseFloat(displayValue)];
-        setOperandHistory(newOperandHistory);
+		const finalOperand = parseFloat(displayValue);
+		setOperands([...operands, finalOperand]);
+		setExpression(expression + displayValue);
+	  
+		let result = operands[0];
+		for (let i = 0; i < operations.length; i++) {
+		  const operator = operations[i];
+		  const operand = operands[i + 1];
+	  
+		  switch (operator) {
+			case '+':
+			  result += operand;
+			  break;
+			case '-':
+			  result -= operand;
+			  break;
+			case '*':
+			  result *= operand;
+			  break;
+			case '/':
+			  if (operand === 0) {
+				setDisplayValue('Error');
+				setOperations([]);
+				setOperands([]);
+				setExpression('');
+				return;
+			  }
+			  result /= operand;
+			  break;
+		  }
+		}
+		setDisplayValue(result.toString());
+  		setOperations([]);
+  		setOperands([]);
+  		setExpression(result.toString());
+};
 
-        let result = newOperandHistory[0];
-        for (let i = 0; i < operatorHistory.length; i++) {
-            const operator = operatorHistory[i];
-            const operand = newOperandHistory[i + 1];
+    // const handleEqual = () => {
+    //     const num1 = parseFloat(firstValue);
+    //     const num2 = parseFloat(displayValue);
 
-            switch (operator) {
-                case '+':
-                    result += operand;
-                    break;
-                case '-':
-                    result -= operand;
-                    break;
-                case '*':
-                    result *= operand;
-                    break;
-                case '/':
-                    result /= operand;
-                    break;
-            }
-        }
+	// 	if (num2 === 0 && operator === '/') {
+	// 		setDisplayValue('Error');
+	// 		setOperator(null);
+	// 		setFirstValue('');
+	// 		return;
 
-        setDisplayValue(result.toString());
-        setOperatorHistory([]);
-        setOperandHistory([]);
-        setLastOperation(null);
-    };
+    //     } else if (operator === '+') {
+    //         setDisplayValue((num1 + num2).toString());
+    //     } else if (operator === '-') {
+    //         setDisplayValue((num1 - num2).toString());
+    //     } else if (operator === '*') {
+    //         setDisplayValue((num1 * num2).toString());
+    //     } else if (operator === '/') {
+    //         setDisplayValue((num1 / num2).toString());
+    //     }
 
-	// Function to handle clear button press
+    // 	setOperator(null);
+    // 	setFirstValue('');
+ 	// };
+
+    // Function to handle clear button press
 	const handleClear = () => {
 		setDisplayValue('0');
 		setOperator(null);
 		setFirstValue('');
+		setOperations([]);
+		setOperands([]);
+		setExpression('');
 	};
+    // const handleClear = () => {
+    //     setDisplayValue('0');
+    //     setOperator(null);
+    //     setFirstValue('');
+    // };
 
-    const handlePercentage = () => {
-        if (operator === null) {
-            // Calculate the percentage of the current value
-            const percentageValue = parseFloat(displayValue) / 100;
-            setDisplayValue(percentageValue.toString());
-        } else {
-            // Calculate the percentage of the first value
-            const num1 = parseFloat(firstValue);
-            const num2 = parseFloat(displayValue);
-            const percentageValue = num1 * (num2 / 100);
-            setDisplayValue(percentageValue.toString());
+	const handlePlusMinus = () => {
+		if (displayValue !== '0') {
+            setDisplayValue((parseFloat(displayValue) * -1));
         }
-    };
+	}
 
-    const handlePlusMinus = () => {
-        if (displayValue !== '0') {
-            setDisplayValue((parseFloat(displayValue) * -1).toString());
-        }
-    };
-
+	const handlePercentage = () => {
+		if (displayValue === '0') {
+			return
+		} else if (firstValue === '') {
+			const num1 = parseFloat(displayValue);
+			setDisplayValue(num1 / 100);
+		} else 
+			{const num1 = parseFloat(firstValue);
+			const num2 = parseFloat(displayValue) / 100;
+			setDisplayValue((num1 + (num1 * num2)).toString());
+			}
+	}
 
 	return (
 		<View style={styles.container}>
@@ -109,7 +178,7 @@ export default function App() {
                         style={styles.button}
                         onPress={() => handlePlusMinus()}
                     >
-                        <Text style={styles.buttonText}>+-</Text>
+                        <Text style={styles.buttonText}>+/-</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={styles.button}
@@ -280,7 +349,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
     },
 	displayText: {
-		fontSize: 48,
+		fontSize: 60,
 		color: '#ffffff',
         textAlign: 'right',
         flex: 1,
@@ -308,7 +377,7 @@ const styles = StyleSheet.create({
 	},
 	buttonText: {
 		fontSize: 30,
-		color: '#333',
+		color: '#ffff',
 	},
 	equalButton: {
 		flex: 3,
@@ -320,6 +389,6 @@ const styles = StyleSheet.create({
 	},
     equalButtonText: {
         fontSize: 32,
-        color: '#333',
+        color: '#ffff',
     },
 });
